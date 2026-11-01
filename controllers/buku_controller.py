@@ -105,20 +105,75 @@ class BukuController:
             messagebox.showerror("Akses Ditolak", "Khusus admin!")
             return
 
-        messagebox.showinfo(
-            "Informasi",
-            "Fungsi perbarui perlu disesuaikan dengan BukuModel."
-        )
+        selected = self.view.tabel.selection()
+
+        if not selected:
+            messagebox.showwarning(
+                "Peringatan",
+                "Pilih data buku yang ingin diperbarui!"
+            )
+            return
+
+        data = self.view.tabel.item(selected[0])["values"]
+        id_buku = data[0]
+
+        judul = self.view.entry_judul.get()
+        penulis = self.view.entry_penulis.get()
+        tahun = self.view.entry_tahun.get()
+
+        if not judul or not penulis or not tahun:
+            messagebox.showwarning(
+                "Peringatan",
+                "Semua kolom harus diisi!"
+            )
+            return
+
+        if self.model.update_buku(id_buku, judul, penulis, tahun):
+            messagebox.showinfo(
+                "Sukses",
+                "Data buku berhasil diperbarui!"
+            )
+            self.muat_data_tabel()
+        else:
+            messagebox.showerror(
+                "Error",
+                "Gagal memperbarui data buku."
+            )
 
     def hapus_data(self):
         if self.user_role != "admin":
             messagebox.showerror("Akses Ditolak", "Khusus admin!")
             return
 
-        messagebox.showinfo(
-            "Informasi",
-            "Fungsi hapus perlu disesuaikan dengan BukuModel."
+        selected = self.view.tabel.selection()
+
+        if not selected:
+            messagebox.showwarning(
+                "Peringatan",
+                "Pilih data buku yang ingin dihapus!"
+            )
+            return
+
+        data = self.view.tabel.item(selected[0])["values"]
+        id_buku = data[0]
+
+        konfirmasi = messagebox.askyesno(
+            "Konfirmasi",
+            "Apakah Anda yakin ingin menghapus data buku?"
         )
+
+        if konfirmasi:
+            if self.model.delete_buku(id_buku):
+                messagebox.showinfo(
+                    "Sukses",
+                    "Data buku berhasil dihapus!"
+                )
+                self.muat_data_tabel()
+            else:
+                messagebox.showerror(
+                    "Error",
+                    "Gagal menghapus data buku."
+                )
 
     def run(self):
         self.view.mainloop()

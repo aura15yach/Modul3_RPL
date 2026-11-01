@@ -1,9 +1,7 @@
-
 import tkinter.messagebox as messagebox
 from models.user_model import UserModel
 from views.login_view import LoginView
 from controllers.buku_controller import BukuController
-
 
 class AuthController:
     def __init__(self):
