@@ -1,46 +1,81 @@
+
 import tkinter.messagebox as messagebox
 from models.buku_model import BukuModel
 from views.buku_view import BukuView
 
+
 class BukuController:
-    def __init__(self):
-        # Inisialisasi Model dan View
+    def __init__(self, user_role="anggota"):
+        self.user_role = user_role
         self.model = BukuModel()
         self.view = BukuView()
 
-        # Binding (mengikat) tombol di View dengan fungsi di Controller
+        # Menampilkan informasi role pada judul jendela aplikasi
+        self.view.title(
+            f"Sistem Manajemen Perpustakaan - Mode: {self.user_role.upper()}"
+        )
+
+        # Binding tombol simpan
         self.view.btn_simpan.configure(command=self.simpan_data)
 
-        # Memuat data ke tabel saat aplikasi pertama kali dibuka
+        # Binding tombol perbarui dan hapus
+        self.view.btn_perbarui.configure(command=self.perbarui_data)
+        self.view.btn_hapus.configure(command=self.hapus_data)
+
+        # OTORISASI: Jika bukan admin, sembunyikan fitur pengelolaan buku
+        if self.user_role != "admin":
+
+            # Mengubah tombol simpan menjadi akses terkunci
+            self.view.btn_simpan.configure(
+                state="disabled",
+                text="Akses Terkunci (Khusus Admin)"
+            )
+
+            # Menyembunyikan tombol khusus admin
+            self.view.btn_perbarui.pack_forget()
+            self.view.btn_hapus.pack_forget()
+
+            # Menonaktifkan seluruh form input
+            self.view.entry_judul.configure(state="disabled")
+            self.view.entry_penulis.configure(state="disabled")
+            self.view.entry_tahun.configure(state="disabled")
+
         self.muat_data_tabel()
 
     def muat_data_tabel(self):
-        # Mengosongkan isi tabel di View terlebih dahulu
+        # Menghapus data lama dari tabel
         for item in self.view.tabel.get_children():
             self.view.tabel.delete(item)
 
-        # Mengambil data dari Model (database)
+        # Mengambil seluruh data buku
         data_buku = self.model.get_all_buku()
 
-        # Memasukkan data baru ke tabel View
+        # Menampilkan data buku ke dalam tabel
         for buku in data_buku:
             self.view.tabel.insert(
-                "", "end",
+                "",
+                "end",
                 values=(
-                    buku["id_buku"],
-                    buku["judul"],
-                    buku["penulis"],
-                    buku["tahun_terbit"]
+                    buku['id_buku'],
+                    buku['judul'],
+                    buku['penulis'],
+                    buku['tahun_terbit']
                 )
             )
 
     def simpan_data(self):
-        # Mengambil teks dari kotak input di View
+        # Proteksi hak akses admin
+        if self.user_role != "admin":
+            messagebox.showerror(
+                "Akses Ditolak",
+                "Anda tidak memiliki izin untuk menambah data!"
+            )
+            return
+
         judul = self.view.entry_judul.get()
         penulis = self.view.entry_penulis.get()
         tahun = self.view.entry_tahun.get()
 
-        # Validasi form kosong
         if not judul or not penulis or not tahun:
             messagebox.showwarning(
                 "Peringatan",
@@ -48,28 +83,42 @@ class BukuController:
             )
             return
 
-        # Mengirim data ke Model untuk disimpan
-        berhasil = self.model.create_buku(judul, penulis, tahun)
-
-        if berhasil:
+        if self.model.create_buku(judul, penulis, tahun):
             messagebox.showinfo(
                 "Sukses",
                 "Data buku berhasil disimpan!"
             )
 
-            # Bersihkan form input
-            self.view.entry_judul.delete(0, "end")
-            self.view.entry_penulis.delete(0, "end")
-            self.view.entry_tahun.delete(0, "end")
+            self.view.entry_judul.delete(0, 'end')
+            self.view.entry_penulis.delete(0, 'end')
+            self.view.entry_tahun.delete(0, 'end')
 
-            # Muat ulang tabel agar data terbaru muncul
             self.muat_data_tabel()
         else:
             messagebox.showerror(
                 "Error",
-                "Terjadi kesalahan saat menyimpan data."
+                "Gagal menyimpan data."
             )
 
-    # Fungsi untuk menyalakan aplikasi
+    def perbarui_data(self):
+        if self.user_role != "admin":
+            messagebox.showerror("Akses Ditolak", "Khusus admin!")
+            return
+
+        messagebox.showinfo(
+            "Informasi",
+            "Fungsi perbarui perlu disesuaikan dengan BukuModel."
+        )
+
+    def hapus_data(self):
+        if self.user_role != "admin":
+            messagebox.showerror("Akses Ditolak", "Khusus admin!")
+            return
+
+        messagebox.showinfo(
+            "Informasi",
+            "Fungsi hapus perlu disesuaikan dengan BukuModel."
+        )
+
     def run(self):
         self.view.mainloop()
