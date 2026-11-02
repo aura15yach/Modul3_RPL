@@ -1,5 +1,6 @@
 import customtkinter as ctk
 
+
 class LoginView(ctk.CTk):
     def __init__(self):
         super().__init__()
@@ -23,7 +24,6 @@ class LoginView(ctk.CTk):
         )
         self.entry_username.pack(pady=10, padx=20, fill="x")
 
-        # Parameter show="*" menyembunyikan karakter password
         self.entry_password = ctk.CTkEntry(
             self.frame,
             placeholder_text="Password",

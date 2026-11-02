@@ -1,12 +1,15 @@
 import tkinter.messagebox as messagebox
+
 from models.user_model import UserModel
 from views.login_view import LoginView
 from controllers.buku_controller import BukuController
+
 
 class AuthController:
     def __init__(self):
         self.model = UserModel()
         self.view = LoginView()
+
         self.view.btn_login.configure(command=self.proses_login)
 
     def proses_login(self):
@@ -14,22 +17,30 @@ class AuthController:
         password = self.view.entry_password.get()
 
         if not username or not password:
-            messagebox.showwarning("Peringatan", "Username dan Password wajib diisi!")
+            messagebox.showwarning(
+                "Peringatan",
+                "Username dan Password wajib diisi!"
+            )
             return
 
         user = self.model.autentikasi(username, password)
 
         if user:
-            messagebox.showinfo("Login Berhasil", f"Selamat datang, {user['username']} ({user['role']})!")
+            messagebox.showinfo(
+                "Login Berhasil",
+                f"Selamat datang, {user['username']} ({user['role']})!"
+            )
 
-            # Tutup jendela Login
             self.view.destroy()
 
-            # Buka jendela Utama Perpustakaan dengan mengirimkan role pengguna
-            app_utama = BukuController(user_role=user['role'])
+            app_utama = BukuController(user_role=user["role"])
             app_utama.run()
+
         else:
-            messagebox.showerror("Login Gagal", "Username atau Password salah!")
+            messagebox.showerror(
+                "Login Gagal",
+                "Username atau Password salah!"
+            )
 
     def run(self):
         self.view.mainloop()
